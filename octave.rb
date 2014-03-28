@@ -36,16 +36,17 @@ class Octave < Formula
   option "without-zlib",           "Do not use zlib (compressed MATLAB file formats)"
 
   depends_on :fortran
-  depends_on :x11
 
   depends_on "pkg-config"     => :build
   depends_on "gnu-sed"        => :build
-  depends_on "texinfo"        => :build if build.with? "docs"
+  if build.with? "docs"
+    depends_on "texinfo"      => :build
+    depends_on :tex           => :build
+  end
   if build.head?
     depends_on "bison"        => :build
     depends_on "automake"     => :build
     depends_on "autoconf"     => :build
-    depends_on :tex           => :build
   end
 
   depends_on "pcre"
@@ -112,8 +113,10 @@ class Octave < Formula
     # Libtool needs to see -framework to handle dependencies better.
     inreplace "configure", "-Wl,-framework -Wl,", "-framework "
     system "./configure", *args
-    # For some reason mkoctfile doesn't know where libX11 is.
-    inreplace "./config.status", "-lX11", "-L/usr/X11/lib -lX11"
+    # Brew's environment adds X11 to the compiler default search path.
+    # mkoctfile does not have that luxury so we need to add an explicit
+    # mention of it back into the LDFLAGS.
+    inreplace "./config.status", "-lX11", "-L#{MacOS::X11.lib} -lX11" if MacOS::X11.installed?
     system "make all"
     system "make check 2>&1 | tee make-check.log" if build.with? "check"
     system "make install"
