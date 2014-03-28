@@ -108,11 +108,12 @@ class Octave < Formula
     end
     args << "--without-zlib"     if build.without? "zlib"
 
-    if build.head?
-      system "./bootstrap"
-      inreplace "configure", /-Wl,-framework -Wl,/, '-framework '
-    end
+    system "./bootstrap" if build.head?
+    # Libtool needs to see -framework to handle dependencies better.
+    inreplace "configure", "-Wl,-framework -Wl,", "-framework "
     system "./configure", *args
+    # For some reason mkoctfile doesn't know where libX11 is.
+    inreplace "./config.status", "-lX11", "-L/usr/X11/lib -lX11"
     system "make all"
     system "make check 2>&1 | tee make-check.log" if build.with? "check"
     system "make install"
