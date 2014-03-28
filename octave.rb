@@ -117,6 +117,7 @@ class Octave < Formula
     # mkoctfile does not have that luxury so we need to add an explicit
     # mention of it back into the LDFLAGS.
     inreplace "./config.status", "-lX11", "-L#{MacOS::X11.lib} -lX11" if MacOS::X11.installed?
+    inreplace "src/mkoctfile.in.cc", "%OCTAVE_CONF_OCTAVE_LINK_DEPS%", '""'
     system "make all"
     system "make check 2>&1 | tee make-check.log" if build.with? "check"
     system "make install"
