@@ -7,11 +7,20 @@ class Octave < Formula
   sha1     "2951aeafe58d562672feb80dd8c3cfe0643a5087"
   head     "http://www.octave.org/hg/octave", :branch => "gui-release", :using => :hg
 
-  # Allows the arrow keys to page through command history.
-  # See: https://savannah.gnu.org/bugs/?41337
+  unless build.head?
+    # Allows the arrow keys to page through command history.
+    # See: https://savannah.gnu.org/bugs/?41337
+    patch do
+      url "https://savannah.gnu.org/bugs/download.php?file_id=30734"
+      sha1 "e8fb39b7ca1525d67e6d24f3c189b441b60fcdab"
+    end
+  end
+
+  # Allows mkoctfile to process "-framework vecLib" properly.
+  # See: https://savannah.gnu.org/bugs/?42002
   patch do
-    url "http://savannah.gnu.org/bugs/download.php?file_id=30734"
-    sha1 "e8fb39b7ca1525d67e6d24f3c189b441b60fcdab"
+    url "https://savannah.gnu.org/patch/download.php?file_id=31072"
+    sha1 "19f2dcaf636f1968c4b1639797415f83fb21d5a3"
   end
 
   skip_clean "share/info" # Keep the docs
@@ -74,6 +83,8 @@ class Octave < Formula
   depends_on "hdf5"           => :recommended
   depends_on "qhull"          => :recommended
   depends_on "qrupdate"       => :recommended
+  depends_on "pstoedit"       => :recommended
+  depends_on "epstool"        => :recommended
 
   depends_on "openblas"       => :optional
 
@@ -113,10 +124,9 @@ class Octave < Formula
     # Libtool needs to see -framework to handle dependencies better.
     inreplace "configure", "-Wl,-framework -Wl,", "-framework "
     system "./configure", *args
-    # Brew's environment adds X11 to the compiler default search path.
-    # mkoctfile does not have that luxury so we need to add an explicit
-    # mention of it back into the LDFLAGS.
-    inreplace "./config.status", "-lX11", "-L#{MacOS::X11.lib} -lX11" if MacOS::X11.installed?
+    # The Mac build configuration passes all linker flags to mkoctfile to
+    # be inserted into every oct/mex build. This is actually unnecessary and
+    # can cause linking problems.
     inreplace "src/mkoctfile.in.cc", "%OCTAVE_CONF_OCTAVE_LINK_DEPS%", '""'
     system "make all"
     system "make check 2>&1 | tee make-check.log" if build.with? "check"
