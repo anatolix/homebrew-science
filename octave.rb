@@ -123,11 +123,11 @@ class Octave < Formula
     system "./bootstrap" if build.head?
     # Libtool needs to see -framework to handle dependencies better.
     inreplace "configure", "-Wl,-framework -Wl,", "-framework "
-    system "./configure", *args
     # The Mac build configuration passes all linker flags to mkoctfile to
     # be inserted into every oct/mex build. This is actually unnecessary and
     # can cause linking problems.
-    inreplace "src/mkoctfile.in.cc", "%OCTAVE_CONF_OCTAVE_LINK_DEPS%", '""'
+    inreplace "src/mkoctfile.in.cc", /%OCTAVE_CONF_OCT(AVE)?_LINK_(DEPS|OPTS)%/, '""'
+    system "./configure", *args
     system "make all"
     system "make check 2>&1 | tee make-check.log" if build.with? "check"
     system "make install"
