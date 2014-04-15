@@ -126,9 +126,9 @@ class Octave < Formula
     # The Mac build configuration passes all linker flags to mkoctfile to
     # be inserted into every oct/mex build. This is actually unnecessary and
     # can cause linking problems.
-    inreplace "./config.status", "-lX11", "-L#{MacOS::X11.lib} -lX11" if MacOS::X11.installed?
     inreplace "src/mkoctfile.in.cc", /%OCTAVE_CONF_OCT(AVE)?_LINK_(DEPS|OPTS)%/, '""'
     system "./configure", *args
+    inreplace "./config.status", "-lX11", "-L#{MacOS::X11.lib} -lX11" if MacOS::X11.installed?
     system "make all"
     system "make check 2>&1 | tee make-check.log" if build.with? "check"
     system "make install"
