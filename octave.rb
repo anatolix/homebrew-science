@@ -62,6 +62,7 @@ class Octave < Formula
   if build.with? "gui" or build.head?
     depends_on "qscintilla2"
     depends_on "qt"
+    depends_on :x11
   end
   if build.with? "native-graphics" or build.head?
     depends_on "fltk"
@@ -128,7 +129,6 @@ class Octave < Formula
     # can cause linking problems.
     inreplace "src/mkoctfile.in.cc", /%OCTAVE_CONF_OCT(AVE)?_LINK_(DEPS|OPTS)%/, '""'
     system "./configure", *args
-    inreplace "./config.status", "-lX11", "-L#{MacOS::X11.lib} -lX11" if MacOS::X11.installed?
     system "make all"
     system "make check 2>&1 | tee make-check.log" if build.with? "check"
     system "make install"
