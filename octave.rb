@@ -62,7 +62,6 @@ class Octave < Formula
   if build.with? "gui" or build.head?
     depends_on "qscintilla2"
     depends_on "qt"
-    depends_on :x11
   end
   if build.with? "native-graphics" or build.head?
     depends_on "fltk"
@@ -120,6 +119,7 @@ class Octave < Formula
       args << "--without-umfpack"
     end
     args << "--without-zlib"     if build.without? "zlib"
+    args << "--with-x=no"     #We don't need X11 for Mac at all
 
     system "./bootstrap" if build.head?
     # Libtool needs to see -framework to handle dependencies better.
